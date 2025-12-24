@@ -5,6 +5,14 @@ from services.extractor import extract_media_info
 from utils.validators import validate_instagram_url, sanitize_url
 import requests
 
+# Mimic Instagram Android App to avoid 403/Hotlinking issues
+HEADERS = {
+    "User-Agent": "Instagram 219.0.0.12.117 Android (31/12; 320dpi; 720x1280; samsung; SM-A325F; a32; qcom; en_US; 314665256)",
+    "Accept": "*/*",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+}
+
 app = FastAPI(title="ReelRovr API")
 
 app.add_middleware(
@@ -45,8 +53,8 @@ def download_media(url: str):
     Proxies the download to avoid CORS and headers issues.
     """
     try:
-        # Stream the content
-        r = requests.get(url, stream=True)
+        # Stream the content with custom headers
+        r = requests.get(url, stream=True, headers=HEADERS)
         r.raise_for_status()
         
         # Forward headers if needed (content-type, content-length)
@@ -66,7 +74,7 @@ def proxy_media(url: str):
     Proxies image requests to bypass hotlinking protection/CORS.
     """
     try:
-        r = requests.get(url, stream=True)
+        r = requests.get(url, stream=True, headers=HEADERS)
         r.raise_for_status()
         return Response(content=r.content, media_type=r.headers.get("Content-Type"))
     except Exception:
