@@ -12,7 +12,6 @@ def extract_media_info(url: str) -> Dict[str, Any]:
         'no_warnings': True,
         'nocheckcertificate': True, # Fix for SSL errors on work laptops/proxies
         'ignoreerrors': False,
-        'user_agent': 'Instagram 219.0.0.12.117 Android (31/12; 320dpi; 720x1280; samsung; SM-A325F; a32; qcom; en_US; 314665256)',
     }
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
