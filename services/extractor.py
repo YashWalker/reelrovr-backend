@@ -18,9 +18,18 @@ def extract_media_info(url: str) -> Dict[str, Any]:
     cookies_content = os.getenv("INSTAGRAM_COOKIES")
     
     if cookies_content:
-        print(f"DEBUG: Found cookies content (Length: {len(cookies_content)})")
-        if not cookies_content.startswith("# Netscape"):
-            print("WARNING: Cookies do not appear to be in Netscape format! Make sure to export as cookies.txt")
+        # Common fix: valid netscape cookies need newlines, but env vars often flatten them.
+        # Check if we need to restore newlines
+        if "\\n" in cookies_content and "\n" not in cookies_content:
+            print("DEBUG: Detected escaped newlines in cookie variable. Restoring...")
+            cookies_content = cookies_content.replace("\\n", "\n")
+
+        line_count = len(cookies_content.splitlines())
+        print(f"DEBUG: Found cookies content (Length: {len(cookies_content)}, Lines: {line_count})")
+        
+        if not cookies_content.strip().startswith("# Netscape"):
+            print("WARNING: Cookies header missing! First 50 chars:", cookies_content[:50])
+        
     else:
         print("DEBUG: No INSTAGRAM_COOKIES environment variable found.")
 
