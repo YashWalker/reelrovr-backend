@@ -10,15 +10,29 @@ def extract_media_info(url: str) -> Dict[str, Any]:
     import os
     import tempfile
     
+    # Support for cookies via environment variable (for blocked server IPs)
+    import os
+    import tempfile
+    
     cookie_file = None
     cookies_content = os.getenv("INSTAGRAM_COOKIES")
     
+    if cookies_content:
+        print(f"DEBUG: Found cookies content (Length: {len(cookies_content)})")
+        if not cookies_content.startswith("# Netscape"):
+            print("WARNING: Cookies do not appear to be in Netscape format! Make sure to export as cookies.txt")
+    else:
+        print("DEBUG: No INSTAGRAM_COOKIES environment variable found.")
+
     ydl_opts = {
         'parse_metadata': True,
         'quiet': True,
         'no_warnings': True,
         'nocheckcertificate': True,
         'ignoreerrors': False,
+        'cachedir': False, # Disable cache to prevent stale errors
+        # Use a standard Desktop UA to match potential browser cookies
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
 
     if cookies_content:
@@ -28,8 +42,9 @@ def extract_media_info(url: str) -> Dict[str, Any]:
             with os.fdopen(fd, 'w') as f:
                 f.write(cookies_content)
             ydl_opts['cookiefile'] = cookie_file
-        except Exception:
-            pass # Fail silently and try without cookies
+            print(f"DEBUG: Wrote cookies to temp file: {cookie_file}")
+        except Exception as e:
+            print(f"ERROR: Failed to write cookie file: {e}")
     
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
