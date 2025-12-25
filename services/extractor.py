@@ -18,6 +18,18 @@ def extract_media_info(url: str) -> Dict[str, Any]:
     cookies_content = os.getenv("INSTAGRAM_COOKIES")
     
     if cookies_content:
+        # Try Base64 Decode first (Best practice for multiline envs to avoid truncation)
+        try:
+            import base64
+            # Check if it looks like base64 (no obvious header text at start)
+            if not cookies_content.strip().startswith("# Netscape"):
+                decoded = base64.b64decode(cookies_content).decode('utf-8')
+                if "# Netscape" in decoded:
+                    print("DEBUG: Successfully Base64 decoded cookies.")
+                    cookies_content = decoded
+        except Exception as e:
+            print(f"DEBUG: Base64 decode failed (normal if not base64): {e}")
+
         # Common fix: valid netscape cookies need newlines, but env vars often flatten them.
         # Check if we need to restore newlines
         if "\\n" in cookies_content and "\n" not in cookies_content:
