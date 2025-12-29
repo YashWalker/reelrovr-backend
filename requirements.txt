@@ -1,6 +1,8 @@
 fastapi
 uvicorn
-yt-dlp @ git+https://github.com/yt-dlp/yt-dlp.git@master
-python-multipart
 requests
+yt-dlp
+instaloader
+python-dotenv
 gunicorn
+pydantic

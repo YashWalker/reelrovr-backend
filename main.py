@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from services.extractor import extract_media_info
 from utils.validators import validate_instagram_url, sanitize_url
 import requests
+from dotenv import load_dotenv
+
+load_dotenv() # Load environment variables from .env file
 
 # Mimic Instagram Android App to avoid 403/Hotlinking issues
 HEADERS = {
@@ -48,7 +51,7 @@ def extract_media(request: URLRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/download")
-def download_media(url: str):
+def download_media(url: str, filename: str = "download"):
     """
     Proxies the download to avoid CORS and headers issues.
     """
@@ -62,7 +65,7 @@ def download_media(url: str):
             content=r.content,
             media_type=r.headers.get("Content-Type"),
             headers={
-                "Content-Disposition": f"attachment; filename=download"
+                "Content-Disposition": f"attachment; filename={filename}"
             }
         )
     except Exception as e:
